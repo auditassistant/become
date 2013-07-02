@@ -1,26 +1,84 @@
-module.exports = function(rootNode){
+module.exports = function(rootNode, options){
+  var options = options || {}
   var result = []
   result.push({path: '/', type: 'element', value: rootNode.nodeName, element: rootNode})
   result.push({path: '/', type: 'attr', value: getAttributes(rootNode), element: rootNode})
 
+  var previousNode = rootNode
+  var count = 1
+
   iterativelyWalk(rootNode.childNodes, function(element){
     if (shouldPreserve(element)) return false
 
-    var path = getPath(element)
+    var path = getPath(element, rootNode)
+    element.dommerPath = path
+
+    if (previousNode.nodeName == element.nodeName){
+      path += count++
+    } else {
+      count = 1
+    }
+
     if (element.nodeType == 1){
       result.push({path: path, type: 'element', value: element.nodeName, element: element})
-      result.push({path: path, type: 'attr', value: getAttributes(element), element: element})
+
+      var attrs = element.attributes
+      for(var i=attrs.length-1; i>=0; i--) {
+        var val = {}
+        val[attrs[i].name] = attrs[i].value
+        result.push({path: path, type: 'attr', value: val, element: element})
+      }
+
       if (!hasChildNodes(element)){
         result.push({path: path, type: 'end', element: element})
-        addEnds(element, result)
+        addEnds(element, result, rootNode)
       }
     } else if (element.nodeType == 3){
       result.push({path: path, type: 'text', value: element.data, element: element})
-      addEnds(element, result)
+      addEnds(element, result, rootNode)
     }
+
+    previousNode = element
   })
 
-  result.push({path: '/', type: 'end', element: rootNode})
+  function getPath(element){
+    var path = ''
+    while (element.parentNode && element != rootNode){
+      if (element.hasAttribute && options.uniqueAttribute && element.hasAttribute(options.uniqueAttribute)){
+        path = element.nodeName + '<' + element.getAttribute(options.uniqueAttribute) + '>/' + path
+      } else {
+        path = element.nodeName + '[' + getIndex(element) + ']/' + path
+      }
+      element = element.parentNode
+    }
+    return '/' + path
+  }
+
+  function addEnds(element, result){
+    if (element.parentNode && lastChild(element.parentNode) == element){
+      result.push({path: element.parentNode.dommerPath || getPath(element.parentNode, rootNode), type: 'end', element: element.parentNode})
+      if (element.parentNode != rootNode){
+        addEnds(element.parentNode, result, rootNode)
+      }
+    }
+  }
+
+  function getIndex(element){
+    var target = element
+    var count = 0
+    var distance = 0
+    while (target.previousSibling && distance < 2){
+      if (target.previousSibling.nodeName == element.nodeName){
+        count += 1
+        distance = 0
+      } else {
+        distance += 1
+      }
+      target = target.previousSibling
+    }
+    return count
+  }
+
   return result
 }
 
@@ -38,14 +96,6 @@ function iterativelyWalk(nodes, cb) {
   }
 }
 
-function getPath(element, rootNode){
-  var path = ''
-  while (element.parentNode && element != rootNode){
-    path = element.nodeName + '/' + path
-    element = element.parentNode
-  }
-  return path
-}
 
 function getAttributes(element){
   var obj = {}
@@ -56,12 +106,6 @@ function getAttributes(element){
   return obj
 }
 
-function addEnds(element, result){
-  if (element.parentNode && lastChild(element.parentNode) == element){
-    result.push({path: getPath(element.parentNode), type: 'end', element: element.parentNode})
-    addEnds(element.parentNode, result)
-  }
-}
 
 function hasChildNodes(element){
   if (!element.hasChildNodes()) return false

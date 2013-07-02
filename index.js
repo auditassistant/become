@@ -1,3 +1,5 @@
+//TODO: support excluding nodes (e.g. sub templates)
+
 var dommer = require('./dommer')
 var updateAttributes = require('./update_attributes')
 
@@ -14,19 +16,22 @@ function equal(a,b){
   if(a && 'object' == typeof a) {
     for(var i in a)
       if(!equal(a[i], b[i])) return false
-    return true
+    for(var i in b)
+      if(!equal(a[i], b[i])) return false
   }
   return a == b
 }
 
-module.exports = function(original, become){
+module.exports = function(original, become, options){
+
+  // options: uniqueAttribute
 
   if (typeof become == 'string'){
     become = elementize(become, original)
   }
 
-  var a = dommer(original)
-  var b = dommer(become)
+  var a = dommer(original, options)
+  var b = dommer(become, options)
 
   var difference = adiff.diff(a, b).reverse()
 
