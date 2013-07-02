@@ -1,7 +1,7 @@
 {
   "name": "become",
   "version": "0.0.0",
-  "description": "Transform target dom elements to become incoming HTML",
+  "description": "Transform target DOM elements to become incoming HTML",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,6 +22,43 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/mmckegg/become/issues"
+  },
+  "devDependencies": {
+    "tape": "~1.0.4"
+  },
+  "testling": {
+    "files": "test.js",
+    "browsers": [
+      "iexplore/6.0",
+      "iexplore/7.0",
+      "iexplore/8.0",
+      "iexplore/10.0",
+      "iexplore/9.0",
+      "chrome/13.0",
+      "chrome/20.0",
+      "chrome/24.0",
+      "chrome/25.0",
+      "firefox/3.0",
+      "firefox/3.6",
+      "firefox/5.0",
+      "firefox/16.0",
+      "firefox/18.0",
+      "firefox/19.0",
+      "opera/10.0",
+      "opera/10.5",
+      "opera/11.0",
+      "opera/12.0",
+      "safari/4.0",
+      "safari/5.0.5",
+      "safari/5.1",
+      "firefox/nightly",
+      "opera/next",
+      "chrome/canary",
+      "iphone/6.0",
+      "ipad/6.0",
+      "safari/6.0",
+      "android-browser/4.2"
+    ]
   },
   "dependencies": {
     "adiff": "~0.2.7"
