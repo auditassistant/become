@@ -1,0 +1,29 @@
+{
+  "name": "become",
+  "version": "0.0.0",
+  "description": "Transform target dom elements to become incoming HTML",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mmckegg/become"
+  },
+  "keywords": [
+    "dom",
+    "diff",
+    "html",
+    "realtime",
+    "template",
+    "transform"
+  ],
+  "author": "Matt McKegg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mmckegg/become/issues"
+  },
+  "dependencies": {
+    "adiff": "~0.2.7"
+  }
+}
