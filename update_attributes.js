@@ -73,9 +73,8 @@ function removeAttribute(element, key){
       var directAttribute = attributeProperties[key.toLowerCase()]
       if (directAttribute){
         element[directAttribute] = ''
-      } else {
-        element.removeAttribute(key)
       }
+      element.removeAttribute(key)
     }
   }
 }
