@@ -2,6 +2,7 @@
 
 var dommer = require('./dommer')
 var updateAttributes = require('./update_attributes')
+var elementize = require('./elementize')
 
 var adiff = require('adiff')({equal: function(a, b){
   if(!a && !b) return true
@@ -96,14 +97,3 @@ function insertNode(node, target){
   }
 }
 
-function elementize(html, rootNode){
-  var wrapper = document.createElement('html')
-  wrapper.innerHTML = html
-  if (rootNode.nodeName == 'HTML') {
-    return wrapper
-  } else if (rootNode.nodeName == 'HEAD' || rootNode.nodeName == 'BODY'){
-    return wrapper.getElementsByTagName(rootNode.nodeName)[0]
-  } else {
-    return wrapper.getElementsByTagName('body')[0].firstChild
-  }
-}

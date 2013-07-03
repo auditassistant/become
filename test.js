@@ -1,6 +1,6 @@
 var test = require('tape')
 var become = require('./index')
-
+var elementize = require('./elementize')
 
 test('add class and wrap text', function(t){
   t.plan(1)
@@ -98,6 +98,27 @@ test('reorder elements', function(t){
 
   t.ok(originalElement.childNodes[0] == node1, 'node 1 is still id 1')
   t.ok(originalElement.childNodes[2] == node2, "node 2 is still id 2")
+})
+
+test('update html root', function(t){
+  t.plan(1)
+
+  var originalElement = document.createElement('html')
+  var head = document.createElement('head')
+  head.innerHTML = '<title>Test</title>'
+  var body = document.createElement('body')
+  body.innerHTML = "Testing 123 <span>some stuff</span>"
+
+  originalElement.appendChild(body)
+
+  var newInnerHtml = "<div class='test2'>Testing 123 <span><strong>some</strong> stuff</span></div>"
+  var newHtml = "<html><head><title>Test</title></head><body>" + newInnerHtml + "</body></html>"
+
+  become(originalElement, newHtml)
+
+  var newWrapper = document.createElement('div')
+  newWrapper.innerHTML = newInnerHtml
+  t.equal(body.innerHTML, newWrapper.innerHTML)
 })
 
 function elementEqual(t, original, html, msg){

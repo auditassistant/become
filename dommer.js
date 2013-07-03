@@ -1,7 +1,7 @@
 module.exports = function(rootNode, options){
   var options = options || {}
   var result = []
-  result.push({path: '/', type: 'element', value: rootNode.nodeName, element: rootNode})
+  result.push({path: '/', type: 'element', value: nodeName(rootNode), element: rootNode})
   result.push({path: '/', type: 'attr', value: getAttributes(rootNode), element: rootNode})
 
   var previousNode = rootNode
@@ -13,14 +13,14 @@ module.exports = function(rootNode, options){
     var path = getPath(element, rootNode)
     element.dommerPath = path
 
-    if (previousNode.nodeName == element.nodeName){
+    if (nodeName(previousNode) == nodeName(element)){
       path += count++
     } else {
       count = 1
     }
 
     if (element.nodeType == 1){
-      result.push({path: path, type: 'element', value: element.nodeName, element: element})
+      result.push({path: path, type: 'element', value: nodeName(element), element: element})
 
       var attrs = element.attributes
       for(var i=attrs.length-1; i>=0; i--) {
@@ -45,9 +45,9 @@ module.exports = function(rootNode, options){
     var path = ''
     while (element.parentNode && element != rootNode){
       if (element.hasAttribute && options.uniqueAttribute && element.hasAttribute(options.uniqueAttribute)){
-        path = element.nodeName + '<' + element.getAttribute(options.uniqueAttribute) + '>/' + path
+        path = nodeName(element) + '<' + element.getAttribute(options.uniqueAttribute) + '>/' + path
       } else {
-        path = element.nodeName + '[' + getIndex(element) + ']/' + path
+        path = nodeName(element) + '[' + getIndex(element) + ']/' + path
       }
       element = element.parentNode
     }
@@ -68,7 +68,7 @@ module.exports = function(rootNode, options){
     var count = 0
     var distance = 0
     while (target.previousSibling && distance < 2){
-      if (target.previousSibling.nodeName == element.nodeName){
+      if (nodeName(target.previousSibling) == nodeName(element)){
         count += 1
         distance = 0
       } else {
@@ -93,6 +93,14 @@ function iterativelyWalk(nodes, cb) {
     if (ret !== false && node.childNodes.length) {
       nodes = slice.call(node.childNodes).concat(nodes)
     }
+  }
+}
+
+function nodeName(element){
+  if (element.hasAttribute && element.hasAttribute('data-nodeName')){
+    return element.getAttribute('data-nodeName').toUpperCase()
+  } else {
+    return element.nodeName
   }
 }
 
