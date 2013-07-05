@@ -1,3 +1,5 @@
+require('es5-shim')
+
 var test = require('tape')
 var become = require('./index')
 var elementize = require('./elementize')
@@ -105,7 +107,9 @@ test('update html root', function(t){
 
   var originalElement = document.createElement('html')
   var head = document.createElement('head')
-  head.innerHTML = '<title>Test</title>'
+  var title = document.createElement('title')
+  title.innerHTML = 'Test'
+  head.appendChild(title)
   var body = document.createElement('body')
   body.innerHTML = "Testing 123 <span>some stuff</span>"
 

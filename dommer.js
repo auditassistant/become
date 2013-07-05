@@ -7,11 +7,10 @@ module.exports = function(rootNode, options){
   var previousNode = rootNode
   var count = 1
 
-  iterativelyWalk(rootNode.childNodes, function(element){
+  walkDom(rootNode, function(element){
     if (shouldPreserve(element)) return false
 
     var path = getPath(element, rootNode)
-    element.dommerPath = path
 
     if (nodeName(previousNode) == nodeName(element)){
       path += count++
@@ -20,6 +19,8 @@ module.exports = function(rootNode, options){
     }
 
     if (element.nodeType == 1){
+
+      element.dommerPath = path
       result.push({path: path, type: 'element', value: nodeName(element), element: element})
 
       var attrs = element.attributes
@@ -82,16 +83,35 @@ module.exports = function(rootNode, options){
   return result
 }
 
-var slice = Array.prototype.slice
+//var slice = Array.prototype.slice
 function iterativelyWalk(nodes, cb) {
-  nodes = slice.call(nodes)
+  nodes = Array.prototype.slice.call(nodes)
 
   while(nodes.length) {
     var node = nodes.shift()
     var ret = cb(node)
 
     if (ret !== false && node.childNodes.length) {
-      nodes = slice.call(node.childNodes).concat(nodes)
+      nodes = Array.prototype.slice.call(node.childNodes).concat(nodes)
+    }
+  }
+}
+
+function walkDom(rootNode, iterator){
+  var currentNode = rootNode.firstChild
+  while (currentNode){
+    iterator(currentNode)
+    if (currentNode.firstChild){
+      currentNode = currentNode.firstChild
+    } else {
+      while (currentNode && !currentNode.nextSibling){
+        if (currentNode !== rootNode) {
+          currentNode = currentNode.parentNode
+        } else {
+          currentNode = null
+        }
+      }
+      currentNode = currentNode && currentNode.nextSibling
     }
   }
 }
@@ -109,7 +129,7 @@ function getAttributes(element){
   var obj = {}
   var attrs = element.attributes
   for(var i=attrs.length-1; i>=0; i--) {
-    obj[attrs[i].name] = attrs[i].value
+    if (obj[attrs[i].specified]!=false) obj[attrs[i].name] = attrs[i].value
   }
   return obj
 }
