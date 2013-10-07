@@ -132,5 +132,9 @@ function elementEqual(t, original, html, msg){
   var wrapperNew = document.createElement('div')
   wrapperNew.innerHTML = html
 
-  t.equal(wrapperOriginal.innerHTML, wrapperNew.innerHTML, msg)
+  t.equal(cleanUp(wrapperOriginal.innerHTML), cleanUp(wrapperNew.innerHTML), msg)
+}
+
+function cleanUp(html){
+  return html.replace(/ dommerPath=\"[^\"]+\"/g, '')
 }

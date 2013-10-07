@@ -25,9 +25,12 @@ module.exports = function(rootNode, options){
 
       var attrs = element.attributes
       for(var i=attrs.length-1; i>=0; i--) {
-        var val = {}
-        val[attrs[i].name] = attrs[i].value
-        result.push({path: path, type: 'attr', value: val, element: element})
+        var attribute = attrs[i];
+        if (attribute.specified && attribute.name != 'dommerPath'){
+          var val = {}
+          val[attribute.name] = attribute.value
+          result.push({path: path, type: 'attr', value: val, element: element})
+        }
       }
 
       if (!hasChildNodes(element)){
@@ -45,7 +48,7 @@ module.exports = function(rootNode, options){
   function getPath(element){
     var path = ''
     while (element.parentNode && element != rootNode){
-      if (element.hasAttribute && options.uniqueAttribute && element.hasAttribute(options.uniqueAttribute)){
+      if (element.getAttribute && options.uniqueAttribute && element.getAttribute(options.uniqueAttribute)){
         path = nodeName(element) + '<' + element.getAttribute(options.uniqueAttribute) + '>/' + path
       } else {
         path = nodeName(element) + '[' + getIndex(element) + ']/' + path
@@ -117,7 +120,7 @@ function walkDom(rootNode, iterator){
 }
 
 function nodeName(element){
-  if (element.hasAttribute && element.hasAttribute('data-nodeName')){
+  if (element.getAttribute && element.getAttribute('data-nodeName')){
     return element.getAttribute('data-nodeName').toUpperCase()
   } else {
     return element.nodeName
@@ -129,7 +132,10 @@ function getAttributes(element){
   var obj = {}
   var attrs = element.attributes
   for(var i=attrs.length-1; i>=0; i--) {
-    if (obj[attrs[i].specified]!=false) obj[attrs[i].name] = attrs[i].value
+    var attribute = attrs[i]
+    if (attribute.specified && attribute.name != 'dommerPath') {
+      obj[attribute.name] = attribute.value
+    }
   }
   return obj
 }
