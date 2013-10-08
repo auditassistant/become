@@ -62,6 +62,6 @@
     ]
   },
   "dependencies": {
-    "adiff": "~0.2.7"
+    "adiff": "~0.2.11"
   }
 }
