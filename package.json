@@ -24,7 +24,7 @@
     "url": "https://github.com/mmckegg/become/issues"
   },
   "devDependencies": {
-    "tape": "~1.0.4",
+    "tape": "~1.1.1",
     "es5-shim": "*"
   },
   "testling": {

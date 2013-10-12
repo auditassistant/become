@@ -24,12 +24,9 @@ function equal(a,b){
 }
 
 module.exports = function(original, become, options){
-
   // options: uniqueAttribute
 
-  if (typeof become == 'string'){
-    become = elementize(become, original)
-  }
+  become = elementize(become, original) // normalize format (html, node, array of nodes)
 
   var a = dommer(original, options)
   var b = dommer(become, options)
