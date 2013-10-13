@@ -120,8 +120,13 @@ function walkDom(rootNode, iterator){
 }
 
 function nodeName(element){
-  if (element.getAttribute && element.getAttribute('data-nodeName')){
-    return element.getAttribute('data-nodeName')
+  var attribute = element.getAttribute && element.getAttribute('data-nodeName')
+  if (attribute){
+    if (attribute.charAt(0) == '#'){
+      return element.getAttribute('data-nodeName')
+    } else {
+      return element.getAttribute('data-nodeName').toUpperCase()
+    }
   } else {
     return element.nodeName
   }
