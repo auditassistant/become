@@ -17,28 +17,30 @@ var attributeProperties = {
 }
 
 module.exports = function(node, attributes, options){
-  var removeAttributes = []
-  if (!options || !options.append){
-    for (var i = 0; i < node.attributes.length; i++) {
-      var attribute = node.attributes[i];
-      if (attribute.specified) {
-        if (attributes[attribute.name] == null || attributes[attribute.name] === ''){
-          removeAttributes.push(attribute.name)
+  if (node.setAttribute){
+    var removeAttributes = []
+    if (!options || !options.append){
+      for (var i = 0; i < node.attributes.length; i++) {
+        var attribute = node.attributes[i];
+        if (attribute.specified) {
+          if (attributes[attribute.name] == null || attributes[attribute.name] === ''){
+            removeAttributes.push(attribute.name)
+          }
         }
       }
     }
-  }
-  Object.keys(attributes).forEach(function(k){
-    if (k.charAt(0) !== '_'){
-      var v = attributes[k]
-      if (getAttribute(node, k) != v){
-        setAttribute(node, k, v)
+    Object.keys(attributes).forEach(function(k){
+      if (k.charAt(0) !== '_'){
+        var v = attributes[k]
+        if (getAttribute(node, k) != v){
+          setAttribute(node, k, v)
+        }
       }
-    }
-  })
-  removeAttributes.forEach(function(k){
-    removeAttribute(node, k)
-  })
+    })
+    removeAttributes.forEach(function(k){
+      removeAttribute(node, k)
+    })
+  }
 }
 
 function getAttribute(element, key){

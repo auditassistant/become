@@ -121,7 +121,7 @@ function walkDom(rootNode, iterator){
 
 function nodeName(element){
   if (element.getAttribute && element.getAttribute('data-nodeName')){
-    return element.getAttribute('data-nodeName').toUpperCase()
+    return element.getAttribute('data-nodeName')
   } else {
     return element.nodeName
   }
@@ -131,10 +131,13 @@ function nodeName(element){
 function getAttributes(element){
   var obj = {}
   var attrs = element.attributes
-  for(var i=attrs.length-1; i>=0; i--) {
-    var attribute = attrs[i]
-    if (attribute.specified && attribute.name != 'dommerPath') {
-      obj[attribute.name] = attribute.value
+  if (attrs){
+    for(var i=attrs.length-1; i>=0; i--) {
+      var attribute = attrs[i]
+      var name = attribute.name.toLowerCase()
+      if (attribute.specified && name != 'dommerpath' && name != 'data-nodename') {
+        obj[attribute.name] = attribute.value
+      }
     }
   }
   return obj
