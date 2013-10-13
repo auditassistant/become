@@ -23,14 +23,9 @@ module.exports = function(rootNode, options){
       element.dommerPath = path
       result.push({path: path, type: 'element', value: nodeName(element), element: element})
 
-      var attrs = element.attributes
-      for(var i=attrs.length-1; i>=0; i--) {
-        var attribute = attrs[i];
-        if (attribute.specified && attribute.name != 'dommerPath'){
-          var val = {}
-          val[attribute.name] = attribute.value
-          result.push({path: path, type: 'attr', value: val, element: element})
-        }
+      var attributes = getAttributes(element)
+      if (Object.keys(attributes).length){
+        result.push({path: path, type: 'attr', value: attributes, element: element})
       }
 
       if (!hasChildNodes(element)){
