@@ -18,11 +18,17 @@ var attributeProperties = {
 
 module.exports = function(node, attributes, options){
   if (node.setAttribute){
+
+    var preserve = []
+    if (attributes['data-preserveAttribute']){
+      preserve = attributes['data-preserveAttribute'].split(' ')
+    }
+
     var removeAttributes = []
     if (!options || !options.append){
       for (var i = 0; i < node.attributes.length; i++) {
         var attribute = node.attributes[i];
-        if (attribute.specified) {
+        if (attribute.specified && !~preserve.indexOf(attribute.name)) {
           if (attributes[attribute.name] == null || attributes[attribute.name] === ''){
             removeAttributes.push(attribute.name)
           }
@@ -32,7 +38,7 @@ module.exports = function(node, attributes, options){
     Object.keys(attributes).forEach(function(k){
       if (k.charAt(0) !== '_'){
         var v = attributes[k]
-        if (getAttribute(node, k) != v){
+        if (getAttribute(node, k) != v && !~preserve.indexOf(k)){
           setAttribute(node, k, v)
         }
       }

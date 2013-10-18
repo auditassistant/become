@@ -68,8 +68,10 @@ module.exports = function(rootNode, options){
     var distance = 0
     while (target.previousSibling && distance < 2){
       if (nodeName(target.previousSibling) == nodeName(element)){
-        count += 1
-        distance = 0
+        if (!shouldPreserve(target.previousSibling)){
+          count += 1
+          distance = 0
+        }
       } else {
         distance += 1
       }
@@ -98,8 +100,8 @@ function iterativelyWalk(nodes, cb) {
 function walkDom(rootNode, iterator){
   var currentNode = rootNode.firstChild
   while (currentNode){
-    iterator(currentNode)
-    if (currentNode.firstChild){
+    var lookInside = iterator(currentNode)
+    if (lookInside !== false && currentNode.firstChild){
       currentNode = currentNode.firstChild
     } else {
       while (currentNode && !currentNode.nextSibling){
