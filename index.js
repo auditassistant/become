@@ -55,6 +55,10 @@ function insert(after, toInsert, options){
 
   var target = [after.element]
 
+  if (after.element.nodeName == '#text'){
+    target.unshift(after.element.parentNode)
+  }
+
   if (after.type == 'end'){
     target = [after.element.parentNode, after.element]
   }
