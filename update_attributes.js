@@ -20,8 +20,8 @@ module.exports = function(node, attributes, options){
   if (node.setAttribute){
 
     var preserve = []
-    if (attributes['data-preserveAttribute']){
-      preserve = attributes['data-preserveAttribute'].split(' ')
+    if (attributes['data-preserve-attribute']){
+      preserve = attributes['data-preserve-attribute'].split(' ')
     }
 
     var removeAttributes = []

@@ -40,7 +40,7 @@ This example adds the class "something" to the element and wraps the word 'stuff
 
 When become is run on an element, it will remove any foreign elements (such as in-place editors and menus) that are not in the newContent. Adding `data-preserve='true'` to these elements will cause them to be ignored and worked around.
 
-If you are wanting to add animations, it's a good idea to add `data-preserveAttribute='style'` to any elements you want to animate. This will ensure that the style is not overwritten mid-animation causing a horrible mess.
+If you are wanting to add animations, it's a good idea to add `data-preserve-attribute='style'` to any elements you want to animate. This will ensure that the style is not overwritten mid-animation causing a horrible mess.
 
 ### Unique attribute option
 
