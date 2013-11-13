@@ -12,7 +12,7 @@ test('add class and wrap text', function(t){
 
   var newHtml = "<div class='test2'>Testing 123 <span><strong>some</strong> stuff</span></div>"
 
-  become(originalElement, newHtml)
+  become(originalElement, newHtml, {tolerance: 0})
   elementEqual(t, originalElement, newHtml)
 })
 
@@ -52,7 +52,7 @@ test('insert same element', function(t){
   elementEqual(t, originalElement, newHtml)
 })
 
-test('insert same element with identifiers', function(t){
+test('insert same element with identifiers (test optimistic)', function(t){
   t.plan(3)
 
   var originalElement = document.createElement('div')
@@ -64,7 +64,7 @@ test('insert same element with identifiers', function(t){
 
   var newHtml = "<div><div id='1'>Test 123</div><div id='3'>Insert</div><div id='2'>Test 1234</div></div>"
 
-  become(originalElement, newHtml, {uniqueAttribute: 'id'})
+  become(originalElement, newHtml, {tolerance: 0})
   elementEqual(t, originalElement, newHtml)
 
   t.ok(originalElement.childNodes[0] == node1, 'node 1 is still id 1')
@@ -83,7 +83,7 @@ test('insert different element', function(t){
   elementEqual(t, originalElement, newHtml)
 })
 
-test('reorder elements', function(t){
+test('reorder elements (test optimistic)', function(t){
   t.plan(3)
 
   var originalElement = document.createElement('div')
@@ -95,11 +95,11 @@ test('reorder elements', function(t){
 
   var newHtml = "<div><div id='1'>Test 123</div><div id='3'>Insert</div><div id='2'>Test 1234</div></div>"
 
-  become(originalElement, newHtml, {uniqueAttribute: 'id'})
+  become(originalElement, newHtml, {tolerance: 0})
   elementEqual(t, originalElement, newHtml)
 
   t.ok(originalElement.childNodes[0] == node1, 'node 1 is still id 1')
-  t.ok(originalElement.childNodes[2] == node2, "node 2 is still id 2")
+  t.ok(originalElement.childNodes[1] == node3, "node 3 is still id 3")
 })
 
 test('update html root', function(t){
@@ -113,12 +113,13 @@ test('update html root', function(t){
   var body = document.createElement('body')
   body.innerHTML = "Testing 123 <span>some stuff</span>"
 
+  originalElement.appendChild(head)
   originalElement.appendChild(body)
 
   var newInnerHtml = "<div class='test2'>Testing 123 <span><strong>some</strong> stuff</span></div>"
   var newHtml = "<html><head><title>Test</title></head><body>" + newInnerHtml + "</body></html>"
 
-  become(originalElement, newHtml)
+  become(originalElement, newHtml, {tolerance: 0})
 
   var newWrapper = document.createElement('div')
   newWrapper.innerHTML = newInnerHtml

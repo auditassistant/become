@@ -60,8 +60,5 @@
       "safari/6.0",
       "android-browser/4.2"
     ]
-  },
-  "dependencies": {
-    "adiff": "~0.2.11"
   }
 }

@@ -117,12 +117,12 @@ function walkDom(rootNode, iterator){
 }
 
 function nodeName(element){
-  var attribute = element.getAttribute && element.getAttribute('data-nodeName')
+  var attribute = element.getAttribute && element.getAttribute('data-node-name')
   if (attribute){
     if (attribute.charAt(0) == '#'){
-      return element.getAttribute('data-nodeName')
+      return element.getAttribute('data-node-name')
     } else {
-      return element.getAttribute('data-nodeName').toUpperCase()
+      return element.getAttribute('data-node-name').toUpperCase()
     }
   } else {
     return element.nodeName

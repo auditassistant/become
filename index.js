@@ -1,120 +1,242 @@
-//TODO: callback onRemove that allows animating the removal
-
-var dommer = require('./dommer')
-var updateAttributes = require('./update_attributes')
-var elementize = require('./elementize')
-
-var adiff = require('adiff')({equal: function(a, b){
-  if(!a && !b) return true
-  if(a && !b) return false
-  return a.path === b.path && a.type === b.type && equal(a.value, b.value)
-}})
-
-function equal(a,b){
-  if(a && !b) return false
-  if(Array.isArray(a))
-    if(a.length != b.length) return false
-  if(a && 'object' == typeof a) {
-    for(var i in a)
-      if(i in a && !equal(a[i], b[i])) return false
-    for(var i in b)
-      if(i in b && !equal(a[i], b[i])) return false
-    return true
-  }
-  return a == b
-}
+var elementize = require('./lib/elementize')
+var attributeUpdate = require('./update_attributes')
 
 module.exports = function(original, become, options){
-  // options: uniqueAttribute, onChange(action, element)
+
   options = options || {}
+  original = elementize(original)
+  become = elementize(become)
 
-  become = elementize(become, original) // normalize format (html, node, array of nodes)
+  var tolerance = options.tolerance == null ? 50 : options.tolerance
+  var notifyChange = options.onChange || function(){}
 
-  var a = dommer(original, options)
-  var b = dommer(become, options)
+  var length = Math.max(original.length, become.length)
 
-  var difference = adiff.diff(a, b).reverse()
+  for (var i=0;i<length;i++){
 
-  difference.forEach(function(diff, i){
+    var a = original[i]
+    var b = become[i]
+    var origin = a
 
-    var after = a[diff[0] - 1]
+    while (a || b){
+      var diff = difference(a, b, tolerance)
+      if ('equal' == diff){
+        next()
+      } else if (!beOptimistic()) {
 
-    if (diff[2]){
-      insert(after, diff.slice(2), options)
+        if ('data' == diff){
+          updateData()
+        } else if ('object' == typeof diff) {
+
+          if (diff.attributes){
+            updateAttributes()
+          }
+
+          if (diff.near){
+            updateInner()
+            next()
+          } else if (diff.inner) {
+            stepIn()
+          } else {
+            next()
+          }
+
+        } else {
+          replace()
+          next()
+        }
+      }
     }
 
-    if (diff[1]){
-      remove(a.slice(diff[0], diff[0] + diff[1]), options)
-    }
-
-  })
-
-}
-
-function insert(after, toInsert, options){
-
-  var target = [after.element]
-
-  if (after.element.nodeName == '#text'){
-    target.unshift(after.element.parentNode)
   }
 
-  if (after.type == 'end'){
-    target = [after.element.parentNode, after.element]
+  function beOptimistic(){
+    // check if the next node on either side is a match
+    var aNext = nextSibling(a)
+    var bNext = nextSibling(b)
+
+    var diff = difference(aNext, b)
+    if ('equal' == diff){
+      a.parentNode.removeChild(a)
+      notifyChange('remove', a)
+      a = aNext
+      next()
+      return true
+    } else {
+      var diff = difference(a, bNext)
+      if ('equal' == diff){
+        var bNew = b.cloneNode(true)
+        a.parentNode.insertBefore(bNew, a)
+        notifyChange('append', bNew)
+        a = bNew
+        next()
+        return true
+      }
+    }
   }
 
-  toInsert.forEach(function(ref){
-    if (ref.type == 'element'){
-      var element = document.createElement(ref.value)
-      insertNode(element, target)
+  function next(){
+    if (a === origin){
+      a = null
+      b = null
+    } else if (nextSibling(a) && nextSibling(b)){
+      a = nextSibling(a)
+      b = nextSibling(b)
+    } else if (!nextSibling(a) && !nextSibling(b)){
+      a = a.parentNode || document
+      b = b.parentNode
 
-      if (options.onChange) {
-        options.onChange('append', element)
+      next()
+    } else {
+
+      if (nextSibling(a)){
+        var remove = nextSibling(a)
+        a.parentNode.removeChild(remove)
+        notifyChange('remove', remove)
+
+      } else if (nextSibling(b)){
+        var newNode = nextSibling(b).cloneNode(true)
+        a.parentNode.appendChild(newNode)
+        notifyChange('append', newNode)
       }
 
-      target = [element]
-    } else if (ref.type == 'text'){
-      var text = document.createTextNode(ref.value)
-      insertNode(text, target)
-
-      if (options.onChange) {
-        options.onChange('append', text)
-      }
-
-      target = [target[0], text] 
-    } else if (ref.type == 'attr'){
-      updateAttributes(target[0], ref.value, options)
-      if (options.onChange) {
-        options.onChange('update', target[0])
-      }
-    } else if (ref.type == 'end'){
-      target = [target[0].parentNode, target[0]]
+      next()
     }
-  })
+  }
+
+  function stepIn(){
+    if (firstChild(a) && firstChild(b)){
+      a = firstChild(a)
+      b = firstChild(b)
+    } else if (!firstChild(a) || !firstChild(b)){
+      updateInner()
+      next()
+    }
+  }
+
+  function updateInner(){
+    a.innerHTML = b.innerHTML
+    notifyChange('inner', a)
+  }
+
+  function updateAttributes(){
+    attributeUpdate(a, getAttributes(b))
+    notifyChange('attributes', a)
+  }
+
+  function updateData(){
+    a.data = b.data
+    notifyChange('data', a)
+  }
+
+  function replace(){
+    var newNode = b.cloneNode(true)
+    ;(a.parentNode || document).replaceChild(newNode, a)
+    notifyChange('remove', a)
+    notifyChange('append', newNode)
+    a = newNode
+  }
+
 }
 
-function remove(toRemove, options){
-  toRemove.forEach(function(ref){
-    if (ref.type == 'element' || ref.type == 'text'){
 
-      if (options.onChange){
-        options.onChange('remove', ref.element)
+function difference(a, b, tolerance){
+
+  if (!a || !b){
+    return 'fail'
+  }
+
+  if (a.nodeType === b.nodeType){
+
+    if (a.nodeType === 1){
+      var aOuter = a.outerHTML
+      var bOuter = b.outerHTML
+
+      if (aOuter === bOuter){
+        return 'equal'
+      } else {
+
+        var aStartIndex = aOuter.indexOf('>'), bStartIndex = bOuter.indexOf('>')
+        var aEndIndex = aOuter.lastIndexOf('<'), bEndIndex = bOuter.lastIndexOf('<')
+        var startA = aOuter.slice(0, aStartIndex+1), startB = bOuter.slice(0, bStartIndex+1)
+        var innerA = aOuter.slice(aStartIndex+1, aEndIndex), innerB = bOuter.slice(bStartIndex+1, bEndIndex)
+
+        if (a.nodeName == b.nodeName){
+
+          var diff = {}
+
+          if (startA !== startB){
+            diff.attributes = true
+          }
+
+          if (innerA != innerB){
+            diff.inner = true
+            var containsPreserve = !!~innerA.indexOf('data-preserve')
+            var withinTolerence = (innerA.length < (tolerance||0) || innerB.length < (tolerance||0))
+            if (!containsPreserve && withinTolerence){
+              diff.near = true
+            }
+          }
+
+          if (Object.keys(diff).length){
+            return diff
+          }
+        }
+
       }
 
-      if (ref.element.parentNode){
-        ref.element.parentNode.removeChild(ref.element)
+    } else if (a.nodeType === 3 || a.nodeType == 8){
+      if (a.data == b.data){
+        return 'equal'
+      } else {
+        return 'data'
       }
-
     }
-  })
+
+  }
+
+
+  return 'all'
 }
 
-function insertNode(node, target){
-  if (!target[0].hasChildNodes() || target[0].lastChild === target[1]){
-    target[0].appendChild(node)
-  } else if (target[1]) {
-    target[0].insertBefore(node, target[1].nextSibling)
+function getAttributes(element){
+  var obj = {}
+  var attrs = element.attributes
+  if (attrs){
+    for(var i=attrs.length-1; i>=0; i--) {
+      var attribute = attrs[i]
+      var name = attribute.name.toLowerCase()
+      if (attribute.specified && name != 'dommerpath' && name != 'data-nodename') {
+        obj[attribute.name] = attribute.value
+      }
+    }
+  }
+  return obj
+}
+
+function nextSibling(node){
+  if (node){
+    var next = node.nextSibling
+    if (shouldPreserve(next)){
+      return nextSibling(next)
+    } else {
+      return next
+    }
+  }
+}
+
+function firstChild(node){
+  var child = node.firstChild
+  if (shouldPreserve(child)){
+    return nextSibling(child)
   } else {
-    target[0].insertBefore(node, target[0].firstChild)
+    return child
+  }
+}
+
+function shouldPreserve(node){
+  if (node && node.getAttribute){
+    var value = node.getAttribute('data-preserve')
+    return (value === '' || value === 'true' || value === 'preserve')
   }
 }
