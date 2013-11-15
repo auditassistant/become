@@ -2,7 +2,6 @@ require('es5-shim')
 
 var test = require('tape')
 var become = require('./index')
-var elementize = require('./elementize')
 
 test('add class and wrap text', function(t){
   t.plan(1)

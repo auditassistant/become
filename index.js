@@ -33,8 +33,11 @@ module.exports = function(original, become, options){
           }
 
           if (diff.near){
-            updateInner()
-            next()
+            if (updateInner()){
+              next()
+            } else {
+              stepIn()
+            }
           } else if (diff.inner) {
             stepIn()
           } else {
@@ -115,7 +118,11 @@ module.exports = function(original, become, options){
   }
 
   function updateInner(){
-    a.innerHTML = b.innerHTML
+    try {
+      a.innerHTML = b.innerHTML
+    } catch (ex){
+      return false
+    }
     notifyChange('inner', a)
   }
 
