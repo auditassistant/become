@@ -1,4 +1,4 @@
-var elementize = require('./lib/elementize')
+var elementize = require('elementize')
 var attributeUpdate = require('./update_attributes')
 
 module.exports = function(original, become, options){
