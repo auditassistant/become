@@ -32,35 +32,26 @@
   },
   "testling": {
     "files": "test.js",
-    "browsers": [
-      "iexplore/6.0",
-      "iexplore/7.0",
-      "iexplore/8.0",
-      "iexplore/9.0",
-      "iexplore/latest",
-      "chrome/10.0",
-      "chrome/20.0",
-      "chrome/latest",
-      "firefox/3.0",
-      "firefox/3.6",
-      "firefox/5.0",
-      "firefox/16.0",
-      "firefox/18.0",
-      "firefox/19.0",
-      "opera/10.0",
-      "opera/10.5",
-      "opera/11.0",
-      "opera/12.0",
-      "safari/4.0",
-      "safari/5.0.5",
-      "safari/5.1",
-      "firefox/nightly",
-      "opera/next",
-      "chrome/canary",
-      "iphone/6.0",
-      "ipad/6.0",
-      "safari/6.0",
-      "android-browser/4.2"
-    ]
+    "testling": {
+       "files": "test/*.js",
+       "browsers": [
+         "ie/6",
+         "ie/9..latest",
+         "firefox/3.6",
+         "firefox/20",
+         "firefox/latest",
+         "firefox/nightly",
+         "chrome/10",
+         "chrome/20",
+         "chrome/latest",
+         "chrome/canary",
+         "opera/latest",
+         "opera/next",
+         "safari/4..latest",
+         "ipad/6.0..latest",
+         "iphone/6.0..latest",
+         "android-browser/4.2..latest"
+       ]
+     }
   }
 }
