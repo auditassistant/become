@@ -13,10 +13,18 @@ module.exports = function(original, become, options){
 
   var length = Math.max(original.length, become.length)
 
+  var offset = 0
+
   for (var i=0;i<length;i++){
 
-    var a = original[i]
+    if (shouldPreserve(original[i+offset])){
+      offset += 1
+      length = Math.max(original.length-offset, become.length)
+    }
+
+    var a = original[i+offset]
     var b = become[i]
+
     var origin = a
 
     while (a || b){
@@ -63,7 +71,7 @@ module.exports = function(original, become, options){
     if ('equal' == diff){
       a.parentNode.removeChild(a)
       notifyChange('remove', a)
-      a = aNext
+      setA(aNext)
       next()
       return true
     } else {
@@ -72,7 +80,7 @@ module.exports = function(original, become, options){
         var bNew = b.cloneNode(true)
         a.parentNode.insertBefore(bNew, a)
         notifyChange('append', bNew)
-        a = bNew
+        setA(bNew)
         next()
         return true
       }
@@ -94,9 +102,13 @@ module.exports = function(original, become, options){
     } else {
 
       if (nextSibling(a)){
-        var remove = nextSibling(a)
-        a.parentNode.removeChild(remove)
-        notifyChange('remove', remove)
+        var remove = null
+        while (remove = nextSibling(a)){
+          a.parentNode.removeChild(remove)
+          notifyChange('remove', remove)
+        }
+        a = a.parentNode || document
+        b = b.parentNode
 
       } else if (nextSibling(b)){
         var newNode = nextSibling(b).cloneNode(true)
@@ -118,6 +130,14 @@ module.exports = function(original, become, options){
     }
   }
 
+  function setA(value){
+    if (a === origin){
+      origin = value
+    }
+    a = value
+  }
+
+
   function updateInner(){
     try {
       a.innerHTML = b.innerHTML
@@ -138,11 +158,18 @@ module.exports = function(original, become, options){
   }
 
   function replace(){
-    var newNode = b.cloneNode(true)
-    ;(a.parentNode || document).replaceChild(newNode, a)
-    notifyChange('remove', a)
-    notifyChange('append', newNode)
-    a = newNode
+    if (b){
+      var newNode = b.cloneNode(true)
+      if (!a){
+        insertAfter(newNode, original[original.length-1])
+      } else {
+        ;(a.parentNode || document).replaceChild(newNode, a)
+        notifyChange('remove', a)
+      }
+
+      notifyChange('append', newNode)
+      setA(newNode)
+    }
   }
 
 }
@@ -243,6 +270,14 @@ function nextSibling(node){
     } else {
       return next
     }
+  }
+}
+
+function insertAfter(node, after){
+  if (after.nextSibling){
+    after.parentNode.insertBefore(node, after.nextSibling)
+  } else {
+    after.parentNode.appendChild(node)
   }
 }
 
