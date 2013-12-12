@@ -1,7 +1,7 @@
 require('es5-shim')
 
 var test = require('tape')
-var become = require('./index')
+var become = require('../')
 
 test('add class and wrap text', function(t){
   t.plan(1)
@@ -37,7 +37,7 @@ test('update inner', function(t){
 
   become(originalElement, newHtml, {tolerance: 0, inner: true})
   
-  t.equal(originalElement.innerHTML, newHtml)
+  elementEqual(t, originalElement, '<div>' + newHtml + '</div>')
 })
 
 test('add new elements (with spaces)', function(t){
@@ -145,9 +145,5 @@ function elementEqual(t, original, html, msg){
   var wrapperNew = document.createElement('div')
   wrapperNew.innerHTML = html
 
-  t.equal(cleanUp(wrapperOriginal.innerHTML), cleanUp(wrapperNew.innerHTML), msg)
-}
-
-function cleanUp(html){
-  return html.replace(/ dommerPath=\"[^\"]+\"/g, '')
+  t.equal(wrapperOriginal.innerHTML, wrapperNew.innerHTML, msg)
 }
