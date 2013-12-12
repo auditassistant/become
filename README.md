@@ -7,11 +7,7 @@ Transform target DOM elements to become incoming HTML.
 
 Useful for faking realtime updates on a page. The module performs a diff against the original element and the new html and will only update the nodes that have actually changed.
 
-## Install
-
-```bash
-$ npm install become
-```
+[![NPM](https://nodei.co/npm/become.png?compact=true)](https://nodei.co/npm/become/)
 
 ## API
 
