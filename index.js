@@ -8,6 +8,7 @@ module.exports = function(original, become, options){
   become = elementize(become)
 
   var tolerance = options.tolerance == null ? 50 : options.tolerance
+  var ignoreAttributes = options.ignoreAttributes || []
   var notifyChange = options.onChange || function(){}
 
   var length = Math.max(original.length, become.length)
@@ -19,7 +20,7 @@ module.exports = function(original, become, options){
     var origin = a
 
     while (a || b){
-      var diff = difference(a, b, tolerance)
+      var diff = difference(a, b, ignoreAttributes, tolerance)
       if ('equal' == diff){
         next()
       } else if (!beOptimistic()) {
@@ -58,7 +59,7 @@ module.exports = function(original, become, options){
     var aNext = nextSibling(a)
     var bNext = nextSibling(b)
 
-    var diff = difference(aNext, b)
+    var diff = difference(aNext, b, ignoreAttributes)
     if ('equal' == diff){
       a.parentNode.removeChild(a)
       notifyChange('remove', a)
@@ -66,7 +67,7 @@ module.exports = function(original, become, options){
       next()
       return true
     } else {
-      var diff = difference(a, bNext)
+      var diff = difference(a, bNext, ignoreAttributes)
       if ('equal' == diff){
         var bNew = b.cloneNode(true)
         a.parentNode.insertBefore(bNew, a)
@@ -127,7 +128,7 @@ module.exports = function(original, become, options){
   }
 
   function updateAttributes(){
-    attributeUpdate(a, getAttributes(b))
+    attributeUpdate(a, getAttributes(b), {ignoreAttributes: ignoreAttributes})
     notifyChange('attributes', a)
   }
 
@@ -147,7 +148,7 @@ module.exports = function(original, become, options){
 }
 
 
-function difference(a, b, tolerance){
+function difference(a, b, ignoreAttributes, tolerance){
 
   if (!a || !b){
     return 'fail'
@@ -156,8 +157,8 @@ function difference(a, b, tolerance){
   if (a.nodeType === b.nodeType){
 
     if (a.nodeType === 1){
-      var aOuter = a.outerHTML
-      var bOuter = b.outerHTML
+      var aOuter = stripAttributes(a.outerHTML, ignoreAttributes)
+      var bOuter = stripAttributes(b.outerHTML, ignoreAttributes)
 
       if (aOuter === bOuter){
         return 'equal'
@@ -219,6 +220,19 @@ function getAttributes(element){
     }
   }
   return obj
+}
+
+var regExpCache = {}
+function stripAttributes(html, attributes){
+  if (attributes && attributes.length){
+    var key = attributes.join(';')
+    if (!regExpCache[key]){
+      regExpCache[key] = new RegExp(' (' + attributes.join('|') + ')="([^"]*)"', 'g')
+    }
+    return html.replace(regExpCache[key], '')
+  } else {
+    return html
+  }
 }
 
 function nextSibling(node){

@@ -24,6 +24,10 @@ module.exports = function(node, attributes, options){
       preserve = attributes['data-preserve-attribute'].split(' ')
     }
 
+    if (options.ignoreAttributes){
+      preserve = preserve.concat(options.ignoreAttributes)
+    }
+
     var removeAttributes = []
     if (!options || !options.append){
       for (var i = 0; i < node.attributes.length; i++) {

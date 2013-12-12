@@ -13,6 +13,24 @@ Useful for faking realtime updates on a page. The module performs a diff against
 $ npm install become
 ```
 
+## API
+
+```js
+var become = require('become')
+```
+
+### become(`original`, `newHtml`, `options`)
+
+**`original`**: A `Node`, array of Nodes or `NodeList` that you want to update
+
+**`newHTML`**: The new html you would like replace the original with.
+
+**options:**
+
+- `ignoreAttribtutes`: An `Array` of attributes to ignore and leave in place (e.g. add style to ensure animations work correctly)
+- `tolerance`: (default `50`) An integer that represents the minimum size innerHTML to search for inner changes. Higher values may increase speed, but won't be as precise.
+- `onChange`: calls `function(action, node)` every time this module makes a change to the DOM.
+
 ## Example
 
 ```html
@@ -47,8 +65,8 @@ var become = require('become')
 var request = require('request')
 
 function softRefresh(){
-  request(window.location.href, function(err, res, body){
-    become(document, body)
+  request(window.location.href, function(err, res, content){
+    become(document, content)
   })
 })
 ```
