@@ -17,9 +17,9 @@ var become = require('become')
 
 ### become(`original`, `newHtml`, `options`)
 
-**`original`**: A `Node`, array of Nodes or `NodeList` that you want to update
+`original`: A Node, Array of Nodes or NodeList that you want to update
 
-**`newHTML`**: The new html you would like replace the original with.
+`newHTML`: The new html you would like replace the original with.
 
 **options:**
 
