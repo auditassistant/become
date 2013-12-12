@@ -28,6 +28,7 @@ var become = require('become')
 **options:**
 
 - `ignoreAttribtutes`: An `Array` of attributes to ignore and leave in place (e.g. add style to ensure animations work correctly)
+- `inner`: (default `false`) Update the innerHTML of `original` instead of the outer.
 - `tolerance`: (default `50`) An integer that represents the minimum size innerHTML to search for inner changes. Higher values may increase speed, but won't be as precise.
 - `onChange`: calls `function(action, node)` every time this module makes a change to the DOM.
 

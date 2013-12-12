@@ -27,6 +27,19 @@ test('add new elements', function(t){
   elementEqual(t, originalElement, newHtml)
 })
 
+test('update inner', function(t){
+  t.plan(1)
+
+  var originalElement = document.createElement('div')
+  originalElement.innerHTML = "Some <strong>content</strong> and more stuff"
+
+  var newHtml = "Some <strong>content</strong> and <em>more really cool</em> stuff"
+
+  become(originalElement, newHtml, {tolerance: 0, inner: true})
+  
+  t.equal(originalElement.innerHTML, newHtml)
+})
+
 test('add new elements (with spaces)', function(t){
   t.plan(1)
 

@@ -2,10 +2,20 @@ var elementize = require('elementize')
 var attributeUpdate = require('./update_attributes')
 
 module.exports = function(original, become, options){
+  // options: tolerance, ignoreAttributes, onChange, inner
 
   options = options || {}
+
   original = elementize(original)
   become = elementize(become)
+
+  if (options.inner){
+    var wrapper = original[0].cloneNode(false)
+    for (var i=0;i<become.length;i++){
+      wrapper.appendChild(become[i])
+    }
+    become = [wrapper]
+  }
 
   var tolerance = options.tolerance == null ? 50 : options.tolerance
   var ignoreAttributes = options.ignoreAttributes || []
