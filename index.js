@@ -134,6 +134,8 @@ module.exports = function(original, become, options){
     if (firstChild(a) && firstChild(b)){
       a = firstChild(a)
       b = firstChild(b)
+    } else if (!firstChild(a) && !firstChild(b)){
+      next()
     } else if (!firstChild(a) || !firstChild(b)){
       updateInner()
       next()
