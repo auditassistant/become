@@ -121,9 +121,12 @@ module.exports = function(original, become, options){
         b = b.parentNode
 
       } else if (nextSibling(b)){
-        var newNode = nextSibling(b).cloneNode(true)
-        a.parentNode.appendChild(newNode)
-        notifyChange('append', newNode)
+        var container = a.parentNode
+        b = nextSibling(b)
+        a = b.cloneNode(true)
+
+        container.appendChild(a)
+        notifyChange('append', a)
       }
 
       next()
@@ -153,10 +156,11 @@ module.exports = function(original, become, options){
   function updateInner(){
     try {
       a.innerHTML = b.innerHTML
+      notifyChange('inner', a)
+      return true
     } catch (ex){
       return false
     }
-    notifyChange('inner', a)
   }
 
   function updateAttributes(){
