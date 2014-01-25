@@ -51,14 +51,19 @@ module.exports = function(original, become, options){
             updateAttributes()
           }
 
-          if (diff.near){
-            if (updateInner()){
-              next()
-            } else {
+          // allow skipping of inner compare (return true)
+          if (!notifyChange('outer', a)){
+            if (diff.near){
+              if (updateInner()){
+                next()
+              } else {
+                stepIn()
+              }
+            } else if (diff.inner) {
               stepIn()
+            } else {
+              next()
             }
-          } else if (diff.inner) {
-            stepIn()
           } else {
             next()
           }
@@ -156,16 +161,16 @@ module.exports = function(original, become, options){
   function updateInner(){
     try {
       a.innerHTML = b.innerHTML
-      notifyChange('inner', a)
-      return true
     } catch (ex){
       return false
     }
+    
+    notifyChange('inner', a)
+    return true
   }
 
   function updateAttributes(){
     attributeUpdate(a, getAttributes(b), {ignoreAttributes: ignoreAttributes})
-    notifyChange('attributes', a)
   }
 
   function updateData(){
