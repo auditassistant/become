@@ -21,6 +21,8 @@ module.exports = function(original, become, options){
   var ignoreAttributes = options.ignoreAttributes || []
   var notifyChange = options.onChange || function(){}
 
+  var changedNodes = []
+
   var length = Math.max(original.length, become.length)
 
   var offset = 0
@@ -47,23 +49,23 @@ module.exports = function(original, become, options){
           updateData()
         } else if ('object' == typeof diff) {
 
+          // push for notify on stepOut
+          if (diff.inner || diff.attributes){
+            changedNodes.push(a)
+          }
+
           if (diff.attributes){
             updateAttributes()
           }
 
-          // allow skipping of inner compare (return true)
-          if (!notifyChange('outer', a)){
-            if (diff.near){
-              if (updateInner()){
-                next()
-              } else {
-                stepIn()
-              }
-            } else if (diff.inner) {
-              stepIn()
-            } else {
+          if (diff.near){
+            if (updateInner()){
               next()
+            } else {
+              stepIn()
             }
+          } else if (diff.inner) {
+            stepIn()
           } else {
             next()
           }
@@ -102,6 +104,12 @@ module.exports = function(original, become, options){
     }
   }
 
+  function checkChanged(node){
+    if (~changedNodes.indexOf(node)){
+      notifyChange('update', node)
+    }
+  }
+
   function next(){
     if (a === origin){
       a = null
@@ -112,7 +120,7 @@ module.exports = function(original, become, options){
     } else if (!nextSibling(a) && !nextSibling(b)){
       a = a.parentNode || document
       b = b.parentNode
-
+      checkChanged(a)
       next()
     } else {
 
@@ -124,6 +132,8 @@ module.exports = function(original, become, options){
         }
         a = a.parentNode || document
         b = b.parentNode
+
+        checkChanged(a)
 
       } else if (nextSibling(b)){
         var container = a.parentNode

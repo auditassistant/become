@@ -26,7 +26,7 @@ var become = require('become')
 - `ignoreAttribtutes`: An `Array` of attributes to ignore and leave in place (e.g. add style to ensure animations work correctly)
 - `inner`: (default `false`) Update the innerHTML of `original` instead of the outer.
 - `tolerance`: (default `50`) An integer that represents the minimum size innerHTML to search for inner changes. Higher values may increase speed, but won't be as precise.
-- `onChange`: calls `function(action, node)` every time this module makes a change to the DOM. Return `true` when action is `"outer"` to skip refreshing of inner nodes. 
+- `onChange`: calls `function(action, node)` every time this module makes a change to the DOM. After a node's attributes or inner content changes, the function is call with action: `'update'`. When a nodes innerHTML has been replaced, it is called with `'inner'`, and when added `'append'` or removed `'remove'`.
 
 ## Example
 
