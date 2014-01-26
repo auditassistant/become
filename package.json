@@ -1,6 +1,6 @@
 {
   "name": "become",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Transform target DOM elements to become incoming HTML",
   "main": "index.js",
   "scripts": {
