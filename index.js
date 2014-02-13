@@ -111,6 +111,8 @@ module.exports = function(original, become, options){
   }
 
   function next(){
+    checkChanged(a)
+
     if (a === origin){
       a = null
       b = null
@@ -120,7 +122,6 @@ module.exports = function(original, become, options){
     } else if (!nextSibling(a) && !nextSibling(b)){
       a = a.parentNode || document
       b = b.parentNode
-      checkChanged(a)
       next()
     } else {
 
@@ -132,8 +133,6 @@ module.exports = function(original, become, options){
         }
         a = a.parentNode || document
         b = b.parentNode
-
-        checkChanged(a)
 
       } else if (nextSibling(b)){
         var container = a.parentNode
