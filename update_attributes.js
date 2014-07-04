@@ -81,6 +81,7 @@ function removeAttribute(element, key){
   if (canModify(element, key)){
     if (key === 'style'){
       element.style.cssText = ''
+      element.removeAttribute('style')
     } else {
       var directAttribute = attributeProperties[key.toLowerCase()]
       if (directAttribute){

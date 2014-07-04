@@ -22,6 +22,7 @@ module.exports = function(original, become, options){
   var notifyChange = options.onChange || function(){}
 
   var changedNodes = []
+  var changedParams = []
 
   var length = Math.max(original.length, become.length)
 
@@ -49,13 +50,18 @@ module.exports = function(original, become, options){
           updateData()
         } else if ('object' == typeof diff) {
 
-          // push for notify on stepOut
-          if (diff.inner || diff.attributes){
-            changedNodes.push(a)
-          }
+          var changeInfo = {}
 
           if (diff.attributes){
+            changeInfo.oldAttributes = getAttributes(a)
             updateAttributes()
+          }
+
+          // push for notify on stepOut
+          if (diff.inner || diff.attributes){
+            changeInfo.inner = diff.inner || false
+            changedNodes.push(a)
+            changedParams.push(changeInfo)
           }
 
           if (diff.near){
@@ -87,7 +93,7 @@ module.exports = function(original, become, options){
     var diff = difference(aNext, b, ignoreAttributes)
     if ('equal' == diff){
       a.parentNode.removeChild(a)
-      notifyChange('remove', a)
+      notifyChange('remove', a, {})
       setA(aNext)
       next()
       return true
@@ -96,7 +102,7 @@ module.exports = function(original, become, options){
       if ('equal' == diff){
         var bNew = b.cloneNode(true)
         a.parentNode.insertBefore(bNew, a)
-        notifyChange('append', bNew)
+        notifyChange('append', bNew, {})
         setA(bNew)
         next()
         return true
@@ -105,8 +111,9 @@ module.exports = function(original, become, options){
   }
 
   function checkChanged(node){
-    if (~changedNodes.indexOf(node)){
-      notifyChange('update', node)
+    var id = changedNodes.indexOf(node)
+    if (~id){
+      notifyChange('update', node, changedParams[id])
     }
   }
 
@@ -129,7 +136,7 @@ module.exports = function(original, become, options){
         var remove = null
         while (remove = nextSibling(a)){
           a.parentNode.removeChild(remove)
-          notifyChange('remove', remove)
+          notifyChange('remove', remove, {})
         }
         a = a.parentNode || document
         b = b.parentNode
@@ -140,7 +147,7 @@ module.exports = function(original, become, options){
         a = b.cloneNode(true)
 
         container.appendChild(a)
-        notifyChange('append', a)
+        notifyChange('append', a, {})
       }
 
       next()
@@ -174,7 +181,7 @@ module.exports = function(original, become, options){
       return false
     }
     
-    notifyChange('inner', a)
+    notifyChange('inner', a, {})
     return true
   }
 
@@ -183,8 +190,9 @@ module.exports = function(original, become, options){
   }
 
   function updateData(){
+    var oldData = a.data
     a.data = b.data
-    notifyChange('data', a)
+    notifyChange('data', a, {oldData: oldData})
   }
 
   function replace(){
@@ -194,10 +202,10 @@ module.exports = function(original, become, options){
         insertAfter(newNode, original[original.length-1])
       } else {
         ;(a.parentNode || document).replaceChild(newNode, a)
-        notifyChange('remove', a)
+        notifyChange('remove', a, {})
       }
 
-      notifyChange('append', newNode)
+      notifyChange('append', newNode, {})
       setA(newNode)
     }
   }

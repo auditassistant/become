@@ -40,6 +40,59 @@ test('update inner', function(t){
   elementEqual(t, originalElement, '<div>' + newHtml + '</div>')
 })
 
+test('notify changes', function(t){
+  t.plan(2)
+
+  var originalElement = document.createElement('div')
+  originalElement.innerHTML = "<div id='123' style='color: red'>Test Things</div> <div>Remove me</div>"
+
+  var newHtml = "<div id='123'>Test <strong>Things</strong></div>"
+
+  var expectedChanges = [ 
+    { 
+      action: 'data', 
+      node: { nodeName: '#text', data: 'Test ' }, 
+      changeInfo: { oldData: 'Test Things' } 
+    }, { 
+      action: 'append', 
+      node: { nodeName: 'STRONG', attributes: {  } }, 
+      changeInfo: {  } 
+    }, { 
+      action: 'update', 
+      node: { nodeName: 'DIV', attributes: { id: '123' } }, 
+      changeInfo: { oldAttributes: { style: 'color: red', id: '123' }, inner: true } 
+    }, { 
+      action: 'remove', 
+      node: { nodeName: '#text', data: ' ' }, 
+      changeInfo: {  } 
+    }, { 
+      action: 'remove', 
+      node: { nodeName: 'DIV', attributes: {  } }, 
+      changeInfo: {  } 
+    }, { 
+      action: 'update', 
+      node: { nodeName: 'DIV', attributes: {  } }, 
+      changeInfo: { inner: true } 
+    } 
+  ]
+
+
+  var changes = []
+  function notifyChange(action, node, changeInfo){
+    if (node.nodeName === '#text'){
+      changes.push({action: action, node: {nodeName: node.nodeName, data: node.data}, changeInfo: changeInfo})
+    } else {
+      changes.push({action: action, node: {nodeName: node.nodeName, attributes: getAttributes(node)}, changeInfo: changeInfo})
+    }
+  }
+
+  become(originalElement, newHtml, {tolerance: 0, inner: true, onChange: notifyChange})
+  
+  t.deepEqual(changes, expectedChanges)
+  
+  elementEqual(t, originalElement, '<div>' + newHtml + '</div>')
+})
+
 test('add new elements (with spaces)', function(t){
   t.plan(1)
 
@@ -146,4 +199,19 @@ function elementEqual(t, original, html, msg){
   wrapperNew.innerHTML = html
 
   t.equal(wrapperOriginal.innerHTML, wrapperNew.innerHTML, msg)
+}
+
+function getAttributes(element){
+  var obj = {}
+  var attrs = element.attributes
+  if (attrs){
+    for(var i=attrs.length-1; i>=0; i--) {
+      var attribute = attrs[i]
+      var name = attribute.name.toLowerCase()
+      if (attribute.specified && name != 'dommerpath' && name != 'data-nodename') {
+        obj[attribute.name] = attribute.value
+      }
+    }
+  }
+  return obj
 }
