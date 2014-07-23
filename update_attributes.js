@@ -1,3 +1,6 @@
+// Most of this file exists to hack around issues with IE8 and lower. A lot of style based attributes do not refresh
+//    if you just setAtttribute and instead must be set as properties.
+
 var attributeProperties = {
     "tabindex": "tabIndex",
     "readonly": "readOnly",
@@ -16,6 +19,8 @@ var attributeProperties = {
     "contenteditable": "contentEditable"
 }
 
+var booleanAttributes = ["checked","disabled","draggable","hidden", "multiple","required","scoped","selected"]
+
 module.exports = function(node, attributes, options){
   if (node.setAttribute){
 
@@ -33,7 +38,7 @@ module.exports = function(node, attributes, options){
       for (var i = 0; i < node.attributes.length; i++) {
         var attribute = node.attributes[i];
         if (attribute.specified && !~preserve.indexOf(attribute.name)) {
-          if (attributes[attribute.name] == null || attributes[attribute.name] === ''){
+          if (attributes[attribute.name] == null){
             removeAttributes.push(attribute.name)
           }
         }
@@ -69,7 +74,13 @@ function setAttribute(element, key, value){
     } else {
       var directAttribute = attributeProperties[key.toLowerCase()]
       if (directAttribute){
-        element[directAttribute] = value
+        if (~booleanAttributes.indexOf(key.toLowerCase())){
+          element[directAttribute] = true
+        } else if (key.toLowerCase() == 'contenteditable' && value === ''){
+          element[directAttribute] = true
+        } else {
+          element[directAttribute] = value
+        }
       } else {
         element.setAttribute(key, value)
       }
@@ -85,7 +96,11 @@ function removeAttribute(element, key){
     } else {
       var directAttribute = attributeProperties[key.toLowerCase()]
       if (directAttribute){
-        element[directAttribute] = ''
+        if (~booleanAttributes.indexOf(key.toLowerCase()) || key.toLowerCase() == 'contenteditable'){
+          element[directAttribute] = false
+        } else {
+          element[directAttribute] = ''
+        }
       }
       element.removeAttribute(key)
     }
