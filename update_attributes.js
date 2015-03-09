@@ -61,7 +61,11 @@ module.exports = function(node, attributes, options){
 function getAttribute(element, key){
   var directAttribute = attributeProperties[key.toLowerCase()]
   if (directAttribute){
-    return element[directAttribute]
+    if (~booleanAttributes.indexOf(key)){
+      return element[directAttribute] ? '' : null
+    } else {
+      return element[directAttribute]
+    }
   } else {
     element.getAttribute(key)
   }
@@ -81,9 +85,9 @@ function setAttribute(element, key, value){
         } else {
           element[directAttribute] = value
         }
-      } else {
-        element.setAttribute(key, value)
       }
+
+      element.setAttribute(key, value)
     }
   }
 }
