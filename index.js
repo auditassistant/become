@@ -15,6 +15,18 @@ module.exports = function(original, become, options){
       wrapper.appendChild(become[i])
     }
     become = [wrapper]
+
+  } else if (original.length === 1 && become.length > 1 && original[0].nodeType === 1) {
+
+    // trim start for whitespace
+    while (become[0] && become[0].nodeType === 3) {
+      become.shift()
+    }
+
+    // trim end for whitespace
+    while (become[become.length-1] && become[become.length-1].nodeType === 3) {
+      become.pop()
+    }
   }
 
   var tolerance = options.tolerance == null ? 50 : options.tolerance

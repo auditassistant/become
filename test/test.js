@@ -27,6 +27,33 @@ test('add new elements', function(t){
   elementEqual(t, originalElement, newHtml)
 })
 
+test('update element with whitespace padded', function(t){
+  t.plan(1)
+
+  var originalElement = document.createElement('ul')
+  originalElement.innerHTML = "<li>Test 123</li> <li>Test 1234</li>"
+
+  var newHtml = " <ul><li>Test 123</li> <li>Test 1234</li></ul> "
+
+  become(originalElement, newHtml)
+  elementEqual(t, originalElement, newHtml.trim())
+})
+
+test('swap elements with white space', function(t){
+  t.plan(1)
+
+  var rootElement = document.createElement('div')
+  var originalElement = document.createElement('em')
+  originalElement.innerHTML = "Test 1234"
+  rootElement.appendChild(originalElement)
+  rootElement.appendChild(document.createElement('span'))
+
+  var newHtml = "<strong>Test 1234</strong>"
+
+  become(originalElement, newHtml)
+  elementEqual(t, rootElement, "<div>" + newHtml + "<span></span></div>")
+})
+
 test('update inner', function(t){
   t.plan(1)
 
